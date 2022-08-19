@@ -25,6 +25,7 @@
 #include "lvgl/examples/lv_examples.h"
 #include "lvgl/demos/lv_demos.h"
 #include "lv_drivers/win32drv/win32drv.h"
+#include "ui_demo/ui.h"
 
 #if _MSC_VER >= 1200
 // Restore compilation warnings.
@@ -108,6 +109,7 @@ int gui_thread_main()
     lv_obj_t* label_obj = lv_label_create(lv_scr_act());
     lv_label_set_text(label_obj, "Hello LVGL");
     lv_obj_center(label_obj);
+    ui_init();
     while (!lv_win32_quit_signal)
     {
         lv_task_handler();
