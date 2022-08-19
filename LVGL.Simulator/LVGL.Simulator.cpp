@@ -33,7 +33,54 @@
 
 #include <stdio.h>
 
-int main()
+#define CANVAS_WIDTH  200
+#define CANVAS_HEIGHT  150
+
+void lv_example_canvass(void)
+{
+    lv_draw_rect_dsc_t rect_dsc;
+    lv_draw_rect_dsc_init(&rect_dsc);
+    rect_dsc.radius = 10;
+    rect_dsc.bg_opa = LV_OPA_COVER;
+    rect_dsc.bg_grad.dir = LV_GRAD_DIR_HOR;
+    rect_dsc.bg_grad.stops[0].color = lv_palette_main(LV_PALETTE_RED);
+    rect_dsc.bg_grad.stops[1].color = lv_palette_main(LV_PALETTE_BLUE);
+    rect_dsc.border_width = 2;
+    rect_dsc.border_opa = LV_OPA_90;
+    rect_dsc.border_color = lv_color_white();
+    rect_dsc.shadow_width = 5;
+    rect_dsc.shadow_ofs_x = 5;
+    rect_dsc.shadow_ofs_y = 5;
+
+    lv_draw_label_dsc_t label_dsc;
+    lv_draw_label_dsc_init(&label_dsc);
+    label_dsc.color = lv_palette_main(LV_PALETTE_ORANGE);
+
+    static lv_color_t cbuf[LV_CANVAS_BUF_SIZE_TRUE_COLOR(CANVAS_WIDTH, CANVAS_HEIGHT)];
+
+    lv_obj_t* canvas = lv_canvas_create(lv_scr_act());
+    lv_canvas_set_buffer(canvas, cbuf, CANVAS_WIDTH, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);
+    lv_obj_center(canvas);
+    lv_canvas_fill_bg(canvas, lv_palette_lighten(LV_PALETTE_GREY, 3), LV_OPA_COVER);
+
+    lv_canvas_draw_rect(canvas, 70, 60, 100, 70, &rect_dsc);
+
+    lv_canvas_draw_text(canvas, 40, 20, 100, &label_dsc, "Some text on text canvas");
+
+    /*Test the rotation. It requires another buffer where the original image is stored.
+     *So copy the current image to buffer and rotate it to the canvas*/
+    static lv_color_t cbuf_tmp[CANVAS_WIDTH * CANVAS_HEIGHT];
+    memcpy(cbuf_tmp, cbuf, sizeof(cbuf_tmp));
+    lv_img_dsc_t img;
+    img.data = (const uint8_t*)cbuf_tmp;
+    img.header.cf = LV_IMG_CF_TRUE_COLOR;
+    img.header.w = CANVAS_WIDTH;
+    img.header.h = CANVAS_HEIGHT;
+
+    lv_canvas_fill_bg(canvas, lv_palette_lighten(LV_PALETTE_GREY, 3), LV_OPA_COVER);
+    lv_canvas_transform(canvas, &img, 120, LV_IMG_ZOOM_NONE, 0, 0, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, true);
+}
+int gui_thread_main()
 {
     lv_init();
 
@@ -48,215 +95,19 @@ int main()
     }
 
     lv_win32_add_all_input_devices_to_group(NULL);
+    static lv_color_t canvas_buf[LV_CANVAS_BUF_SIZE_TRUE_COLOR(CANVAS_WIDTH, CANVAS_HEIGHT)];
 
-    /*
-     * Demos, benchmarks, and tests.
-     *
-     * Uncomment any one (and only one) of the functions below to run that
-     * item.
-     */
-
-    // ----------------------------------
-    // my freetype application
-    // ----------------------------------
-
-    ///*Init freetype library
-    // *Cache max 64 faces and 1 size*/
-    //lv_freetype_init(64, 1, 0);
-
-    ///*Create a font*/
-    //static lv_ft_info_t info;
-    //info.name = "./lvgl/src/extra/libs/freetype/arial.ttf";
-    //info.weight = 36;
-    //info.style = FT_FONT_STYLE_NORMAL;
-    //lv_ft_font_init(&info);
-
-    ///*Create style with the new font*/
-    //static lv_style_t style;
-    //lv_style_init(&style);
-    //lv_style_set_text_font(&style, info.font);
-
-    ///*Create a label with the new style*/
-    //lv_obj_t* label = lv_label_create(lv_scr_act());
-    //lv_obj_add_style(label, &style, 0);
-    //lv_label_set_text(label, "FreeType Arial Test");
-
-    // ----------------------------------
-    // my Win32 filesystem driver application
-    // ----------------------------------
-
-    /*::lv_fs_win32_init();
-
-    lv_fs_dir_t d;
-    if (lv_fs_dir_open(&d, "/") == LV_FS_RES_OK)
-    {
-        char b[MAX_PATH];
-        memset(b, 0, MAX_PATH);
-        while (lv_fs_dir_read(&d, b) == LV_FS_RES_OK)
-        {
-            printf("%s\n", b);
-        }
-
-        lv_fs_dir_close(&d);
-    }*/
-
-    // ----------------------------------
-    // Demos from lv_examples
-    // ----------------------------------
-
-    lv_demo_widgets();           // ok
-    // lv_demo_benchmark();
-    // lv_demo_keypad_encoder();    // ok
-    // lv_demo_music();             // removed from repository
-    // lv_demo_printer();           // removed from repository
-    // lv_demo_stress();            // ok
-
-    // ----------------------------------
-    // LVGL examples
-    // ----------------------------------
-
-    /*
-     * There are many examples of individual widgets found under the
-     * lvgl\exampless directory.  Here are a few sample test functions.
-     * Look in that directory to find all the rest.
-     */
-
-    // lv_ex_get_started_1();
-    // lv_ex_get_started_2();
-    // lv_ex_get_started_3();
-
-    // lv_example_flex_1();
-    // lv_example_flex_2();
-    // lv_example_flex_3();
-    // lv_example_flex_4();
-    // lv_example_flex_5();
-    // lv_example_flex_6();        // ok
-
-    // lv_example_grid_1();
-    // lv_example_grid_2();
-    // lv_example_grid_3();
-    // lv_example_grid_4();
-    // lv_example_grid_5();
-    // lv_example_grid_6();
-
-    // lv_port_disp_template();
-    // lv_port_fs_template();
-    // lv_port_indev_template();
-
-    // lv_example_scroll_1();
-    // lv_example_scroll_2();
-    // lv_example_scroll_3();
-
-    // lv_example_style_1();
-    // lv_example_style_2();
-    // lv_example_style_3();
-    // lv_example_style_4();        // ok
-    // lv_example_style_6();        // file has no source code
-    // lv_example_style_7();
-    // lv_example_style_8();
-    // lv_example_style_9();
-    // lv_example_style_10();
-    // lv_example_style_11();       // ok
-
-    // ----------------------------------
-    // LVGL widgets examples
-    // ----------------------------------
-
-    // lv_example_arc_1();
-    // lv_example_arc_2();
-
-    // lv_example_bar_1();          // ok
-    // lv_example_bar_2();
-    // lv_example_bar_3();
-    // lv_example_bar_4();
-    // lv_example_bar_5();
-    // lv_example_bar_6();          // issues
-
-    // lv_example_btn_1();
-    // lv_example_btn_2();
-    // lv_example_btn_3();
-
-    // lv_example_btnmatrix_1();
-    // lv_example_btnmatrix_2();
-    // lv_example_btnmatrix_3();
-
-    // lv_example_calendar_1();
-
-    // lv_example_canvas_1();
-    // lv_example_canvas_2();
-
-    // lv_example_chart_1();        // ok
-    // lv_example_chart_2();        // ok
-    // lv_example_chart_3();        // ok
-    // lv_example_chart_4();        // ok
-    // lv_example_chart_5();        // ok
-    // lv_example_chart_6();        // ok
-
-    // lv_example_checkbox_1();
-
-    // lv_example_colorwheel_1();   // ok
-
-    // lv_example_dropdown_1();
-    // lv_example_dropdown_2();
-    // lv_example_dropdown_3();
-
-    // lv_example_img_1();
-    // lv_example_img_2();
-    // lv_example_img_3();
-    // lv_example_img_4();         // ok
-
-    // lv_example_imgbtn_1();
-
-    // lv_example_keyboard_1();    // ok
-
-    // lv_example_label_1();
-    // lv_example_label_2();       // ok
-
-    // lv_example_led_1();
-
-    // lv_example_line_1();
-
-    // lv_example_list_1();
-
-    // lv_example_meter_1();
-    // lv_example_meter_2();
-    // lv_example_meter_3();
-    // lv_example_meter_4();       // ok
-
-    // lv_example_msgbox_1();
-
-    // lv_example_obj_1();         // ok
-
-    // lv_example_roller_1();
-    // lv_example_roller_2();      // ok
-
-    // lv_example_slider_1();      // ok
-    // lv_example_slider_2();      // issues
-    // lv_example_slider_3();      // issues
-
-    // lv_example_spinbox_1();
-
-    // lv_example_spinner_1();     // ok
-
-    // lv_example_switch_1();      // ok
-
-    // lv_example_table_1();
-    // lv_example_table_2();       // ok
-
-    // lv_example_tabview_1();
-
-    // lv_example_textarea_1();    // ok
-    // lv_example_textarea_2();
-    // lv_example_textarea_3();    // ok, but not all button have functions
-
-    // lv_example_tileview_1();    // ok
-
-    // lv_example_win_1();         // ok
-
-    // ----------------------------------
-    // Task handler loop
-    // ----------------------------------
-
+    lv_obj_t* canvas_obj = lv_canvas_create(lv_scr_act());
+    lv_obj_center(canvas_obj);
+    lv_memset_ff(canvas_buf, LV_CANVAS_BUF_SIZE_TRUE_COLOR(CANVAS_WIDTH, CANVAS_HEIGHT));
+    lv_canvas_set_buffer(canvas_obj, canvas_buf, CANVAS_WIDTH, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);
+    lv_canvas_fill_bg(canvas_obj, lv_palette_lighten(LV_PALETTE_YELLOW, 3), LV_OPA_COVER);
+    lv_obj_set_style_border_color(canvas_obj, lv_color_black(), LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(canvas_obj, 3, LV_STATE_DEFAULT);
+    lv_obj_set_style_radius(canvas_obj, 5, LV_STATE_DEFAULT);
+    lv_obj_t* label_obj = lv_label_create(lv_scr_act());
+    lv_label_set_text(label_obj, "Hello LVGL");
+    lv_obj_center(label_obj);
     while (!lv_win32_quit_signal)
     {
         lv_task_handler();

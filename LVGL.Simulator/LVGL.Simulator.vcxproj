@@ -43,6 +43,7 @@
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="application.cpp" />
     <ClCompile Include="LVGL.Simulator.cpp" />
   </ItemGroup>
   <ItemGroup>
