@@ -1,0 +1,16 @@
+{
+  "codename": "14_bold",
+  "ttf_path": "\\assets\\fonts\\Montserrat-Bold.ttf",
+  "bin_path": "\\assets\\fonts\\ui_font_14_bold.bin",
+  "c_path": "\\assets\\fonts\\ui_font_14_bold.c",
+  "cfg_path": "\\assets\\fonts\\ui_font_14_bold.fcfg",
+  "size": 15,
+  "bpp": 8,
+  "letters": 3,
+  "ranges": [
+    "0x20-0xff"
+  ],
+  "symbols": "",
+  "customparams": "--no-compress --no-prefilter",
+  "uploaded": false
+}

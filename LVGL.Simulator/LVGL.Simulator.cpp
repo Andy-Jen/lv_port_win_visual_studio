@@ -110,6 +110,8 @@ int gui_thread_main()
     lv_label_set_text(label_obj, "Hello LVGL");
     lv_obj_center(label_obj);
     ui_init();
+    
+    lv_obj_add_flag(ui_IMG_USB, LV_OBJ_FLAG_HIDDEN);
     while (!lv_win32_quit_signal)
     {
         lv_task_handler();
