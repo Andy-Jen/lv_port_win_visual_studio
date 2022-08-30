@@ -9,8 +9,15 @@
  */
 
 #include <Windows.h>
-
+#include <stdio.h>
+#include <tchar.h>
+#include <setupapi.h>
+#include <locale.h>
+#include <string>
+#include <iostream>
 #include "resource.h"
+
+using namespace std;
 
 #if _MSC_VER >= 1200
  // Disable compilation warnings.
@@ -81,6 +88,151 @@ void lv_example_canvass(void)
     lv_canvas_fill_bg(canvas, lv_palette_lighten(LV_PALETTE_GREY, 3), LV_OPA_COVER);
     lv_canvas_transform(canvas, &img, 120, LV_IMG_ZOOM_NONE, 0, 0, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, true);
 }
+#define MAX_PORT_NUM    20
+#define MAX_STR_LEN    20
+UINT win_com_scan(wchar_t pPortName[][MAX_STR_LEN])
+{
+    UINT com_cnt = 0;
+
+    HKEY hSERIALCOMM;
+
+    if (ERROR_SUCCESS == RegOpenKeyEx(HKEY_LOCAL_MACHINE,
+        TEXT("HARDWARE\\DEVICEMAP\\SERIALCOMM"), 0, KEY_QUERY_VALUE, &hSERIALCOMM)
+        )
+    {
+        //Get the max value name and max value lengths
+        DWORD dwMaxValueNameLen;
+        DWORD dwMaxValueLen;
+        DWORD dwQueryInfo;
+
+        dwQueryInfo = RegQueryInfoKey(hSERIALCOMM, NULL, NULL,
+            NULL, NULL, NULL, NULL, NULL,
+            &dwMaxValueNameLen, &dwMaxValueLen, NULL, NULL);
+
+        if (ERROR_SUCCESS == dwQueryInfo)
+        {
+            DWORD dwMaxValueNameSizeInChars, dwMaxValueNameSizeInBytes,
+                dwMaxValueDataSizeInChars, dwMaxValueDataSizeInBytes;
+
+            DWORD* pValueName;
+            DWORD* pValueData;
+
+            dwMaxValueNameSizeInChars = dwMaxValueNameLen + 1; //Include space for the NULL terminator
+            dwMaxValueNameSizeInBytes = dwMaxValueNameSizeInChars * sizeof(TCHAR);
+            dwMaxValueDataSizeInChars = dwMaxValueLen / sizeof(TCHAR) + 1; //Include space for the NULL terminator
+            dwMaxValueDataSizeInBytes = dwMaxValueDataSizeInChars * sizeof(TCHAR);
+
+            //Allocate some space for the value name and value data      
+
+            pValueName = (DWORD*)(GUID*)HeapAlloc(GetProcessHeap(),
+                HEAP_GENERATE_EXCEPTIONS | HEAP_ZERO_MEMORY, dwMaxValueNameSizeInBytes);
+            pValueData = (DWORD*)(GUID*)HeapAlloc(GetProcessHeap(),
+                HEAP_GENERATE_EXCEPTIONS | HEAP_ZERO_MEMORY, dwMaxValueDataSizeInBytes);
+
+            if (NULL != pValueName && NULL != pValueData)
+            {
+                //Enumerate all the values underneath HKEY_LOCAL_MACHINE\HARDWARE\DEVICEMAP\SERIALCOMM
+                DWORD i;
+                DWORD dwType;
+                DWORD dwValueNameSize;
+                DWORD dwDataSize;
+                LONG nEnum;
+
+
+                dwValueNameSize = dwMaxValueNameSizeInChars;
+                dwDataSize = dwMaxValueDataSizeInBytes;
+
+                i = 0;
+
+                nEnum = RegEnumValue(hSERIALCOMM, i,
+                    (LPWSTR)pValueName, &dwValueNameSize, NULL, &dwType,
+                    (LPBYTE)pValueData, &dwDataSize);
+
+                com_cnt = 0;
+                while (ERROR_SUCCESS == nEnum)
+                {
+                    //If the value is of the correct type, then add it to the array
+                    if (REG_SZ == dwType)
+                    {
+                        _stprintf(pPortName[com_cnt], TEXT("%s"), pValueData);
+                        com_cnt++;
+                    }/*if */
+
+                    //Prepare for the next time around
+                    dwValueNameSize = dwMaxValueNameSizeInChars;
+                    dwDataSize = dwMaxValueDataSizeInBytes;
+                    ZeroMemory(pValueName, dwMaxValueNameSizeInBytes);
+                    ZeroMemory(pValueData, dwMaxValueDataSizeInBytes);
+                    i++;
+                    nEnum = RegEnumValue(hSERIALCOMM, i, (LPWSTR)pValueName,
+                        &dwValueNameSize, NULL, &dwType, (LPBYTE)pValueData, &dwDataSize);
+                    
+                }/*while*/
+            }
+            else
+            {
+                return FALSE;
+            }/*if NULL != pValueName && NULL != pValueData*/
+
+            HeapFree(GetProcessHeap(), 0, pValueName);
+            HeapFree(GetProcessHeap(), 0, pValueData);
+        }/*ERROR_SUCCESS == dwQueryInfo*/
+
+        //Close the registry key now that we are finished with it    
+        RegCloseKey(hSERIALCOMM);
+
+        if (dwQueryInfo != ERROR_SUCCESS)
+            return FALSE;
+    }/*ERROR_SUCCESS == RegOpenKeyEx*/
+
+    return com_cnt;
+}/*EnumerateComPortRegistry*/
+
+
+HANDLE win_com_open(LPCWSTR protname)
+{
+    HANDLE hCom;  //全局变量，串口句柄
+    DWORD erM = 0;
+    int portID = 0;
+    wchar_t comName[10];
+    _stscanf(protname, TEXT("COM%d"), &portID);
+    if (portID > 9)
+    {
+        _stprintf(comName, L"\\\\.\\%s", protname);
+    }
+    else
+    {
+        _stprintf(comName, L"%s", protname);
+    }
+    _tprintf(TEXT("Try open [%s]\n"), comName);
+    hCom = CreateFile(comName,
+        GENERIC_READ | GENERIC_WRITE, //允许读和写
+        0,  //独占方式
+        NULL,
+        OPEN_EXISTING,  //打开而不是创建
+        FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, //重叠方式
+        NULL);
+
+    if (hCom == INVALID_HANDLE_VALUE)
+    {
+        _tprintf(TEXT("Open Faild, Close com port"));
+        CloseHandle(hCom);
+        hCom = NULL;
+        return hCom;
+    }
+    _tprintf(TEXT("Open Success"));
+    return hCom;
+}
+
+
+bool win_com_close(HANDLE hCom)
+{
+    _tprintf(TEXT("Close com port success"));
+    CloseHandle(hCom);
+    return true;
+}
+
+
 int gui_thread_main()
 {
     lv_init();
@@ -112,6 +264,21 @@ int gui_thread_main()
     ui_init();
     
     lv_obj_add_flag(ui_IMG_USB, LV_OBJ_FLAG_HIDDEN);
+
+    wchar_t portName[MAX_PORT_NUM][MAX_STR_LEN];
+    UINT n;
+    HANDLE hCom;
+
+    _tprintf(TEXT("\nQueryDosDevice method : \n"));
+    n = win_com_scan(portName);
+    for (UINT i = 0; i < n; i++)
+        _tprintf(TEXT("\t%s\n"), portName[i]);
+
+    hCom = win_com_open(portName[1]);
+    if (hCom != NULL)
+    {
+        win_com_close(hCom);
+    }
     while (!lv_win32_quit_signal)
     {
         lv_task_handler();
