@@ -16,6 +16,7 @@
 #include <string>
 #include <iostream>
 #include "resource.h"
+#include "serial_port.h"
 
 using namespace std;
 
@@ -40,6 +41,8 @@ using namespace std;
 #endif
 
 #include <stdio.h>
+
+SerialPort serial;
 
 #define CANVAS_WIDTH  200
 #define CANVAS_HEIGHT  150
@@ -88,149 +91,65 @@ void lv_example_canvass(void)
     lv_canvas_fill_bg(canvas, lv_palette_lighten(LV_PALETTE_GREY, 3), LV_OPA_COVER);
     lv_canvas_transform(canvas, &img, 120, LV_IMG_ZOOM_NONE, 0, 0, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, true);
 }
-#define MAX_PORT_NUM    20
-#define MAX_STR_LEN    20
-UINT win_com_scan(wchar_t pPortName[][MAX_STR_LEN])
+
+
+UINT port_id[20];
+
+void refresh_serial_list(lv_obj_t* list_obj)
 {
-    UINT com_cnt = 0;
-
-    HKEY hSERIALCOMM;
-
-    if (ERROR_SUCCESS == RegOpenKeyEx(HKEY_LOCAL_MACHINE,
-        TEXT("HARDWARE\\DEVICEMAP\\SERIALCOMM"), 0, KEY_QUERY_VALUE, &hSERIALCOMM)
-        )
+    if (serial.scan(port_id) != TRUE)
     {
-        //Get the max value name and max value lengths
-        DWORD dwMaxValueNameLen;
-        DWORD dwMaxValueLen;
-        DWORD dwQueryInfo;
-
-        dwQueryInfo = RegQueryInfoKey(hSERIALCOMM, NULL, NULL,
-            NULL, NULL, NULL, NULL, NULL,
-            &dwMaxValueNameLen, &dwMaxValueLen, NULL, NULL);
-
-        if (ERROR_SUCCESS == dwQueryInfo)
-        {
-            DWORD dwMaxValueNameSizeInChars, dwMaxValueNameSizeInBytes,
-                dwMaxValueDataSizeInChars, dwMaxValueDataSizeInBytes;
-
-            DWORD* pValueName;
-            DWORD* pValueData;
-
-            dwMaxValueNameSizeInChars = dwMaxValueNameLen + 1; //Include space for the NULL terminator
-            dwMaxValueNameSizeInBytes = dwMaxValueNameSizeInChars * sizeof(TCHAR);
-            dwMaxValueDataSizeInChars = dwMaxValueLen / sizeof(TCHAR) + 1; //Include space for the NULL terminator
-            dwMaxValueDataSizeInBytes = dwMaxValueDataSizeInChars * sizeof(TCHAR);
-
-            //Allocate some space for the value name and value data      
-
-            pValueName = (DWORD*)(GUID*)HeapAlloc(GetProcessHeap(),
-                HEAP_GENERATE_EXCEPTIONS | HEAP_ZERO_MEMORY, dwMaxValueNameSizeInBytes);
-            pValueData = (DWORD*)(GUID*)HeapAlloc(GetProcessHeap(),
-                HEAP_GENERATE_EXCEPTIONS | HEAP_ZERO_MEMORY, dwMaxValueDataSizeInBytes);
-
-            if (NULL != pValueName && NULL != pValueData)
-            {
-                //Enumerate all the values underneath HKEY_LOCAL_MACHINE\HARDWARE\DEVICEMAP\SERIALCOMM
-                DWORD i;
-                DWORD dwType;
-                DWORD dwValueNameSize;
-                DWORD dwDataSize;
-                LONG nEnum;
-
-
-                dwValueNameSize = dwMaxValueNameSizeInChars;
-                dwDataSize = dwMaxValueDataSizeInBytes;
-
-                i = 0;
-
-                nEnum = RegEnumValue(hSERIALCOMM, i,
-                    (LPWSTR)pValueName, &dwValueNameSize, NULL, &dwType,
-                    (LPBYTE)pValueData, &dwDataSize);
-
-                com_cnt = 0;
-                while (ERROR_SUCCESS == nEnum)
-                {
-                    //If the value is of the correct type, then add it to the array
-                    if (REG_SZ == dwType)
-                    {
-                        _stprintf(pPortName[com_cnt], TEXT("%s"), pValueData);
-                        com_cnt++;
-                    }/*if */
-
-                    //Prepare for the next time around
-                    dwValueNameSize = dwMaxValueNameSizeInChars;
-                    dwDataSize = dwMaxValueDataSizeInBytes;
-                    ZeroMemory(pValueName, dwMaxValueNameSizeInBytes);
-                    ZeroMemory(pValueData, dwMaxValueDataSizeInBytes);
-                    i++;
-                    nEnum = RegEnumValue(hSERIALCOMM, i, (LPWSTR)pValueName,
-                        &dwValueNameSize, NULL, &dwType, (LPBYTE)pValueData, &dwDataSize);
-                    
-                }/*while*/
-            }
-            else
-            {
-                return FALSE;
-            }/*if NULL != pValueName && NULL != pValueData*/
-
-            HeapFree(GetProcessHeap(), 0, pValueName);
-            HeapFree(GetProcessHeap(), 0, pValueData);
-        }/*ERROR_SUCCESS == dwQueryInfo*/
-
-        //Close the registry key now that we are finished with it    
-        RegCloseKey(hSERIALCOMM);
-
-        if (dwQueryInfo != ERROR_SUCCESS)
-            return FALSE;
-    }/*ERROR_SUCCESS == RegOpenKeyEx*/
-
-    return com_cnt;
-}/*EnumerateComPortRegistry*/
-
-
-HANDLE win_com_open(LPCWSTR protname)
-{
-    HANDLE hCom;  //全局变量，串口句柄
-    DWORD erM = 0;
-    int portID = 0;
-    wchar_t comName[10];
-    _stscanf(protname, TEXT("COM%d"), &portID);
-    if (portID > 9)
-    {
-        _stprintf(comName, L"\\\\.\\%s", protname);
+        _tprintf(TEXT("Scan serial port failed."));
     }
     else
     {
-        _stprintf(comName, L"%s", protname);
+        _tprintf(TEXT("Scan serial port success, find com count: %d\n"), serial.com_cnt);
+        lv_dropdown_clear_options(list_obj);
+        lv_dropdown_set_selected(list_obj, -1);
+        char p_buf[20];
+        for (UINT i = 0; i < serial.com_cnt; i++)
+        {
+            sprintf_s(p_buf, "COM %d", port_id[i]);
+            lv_dropdown_add_option(list_obj, p_buf, LV_DROPDOWN_POS_LAST);
+            memset(p_buf, 0, 20);
+        }
     }
-    _tprintf(TEXT("Try open [%s]\n"), comName);
-    hCom = CreateFile(comName,
-        GENERIC_READ | GENERIC_WRITE, //允许读和写
-        0,  //独占方式
-        NULL,
-        OPEN_EXISTING,  //打开而不是创建
-        FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, //重叠方式
-        NULL);
-
-    if (hCom == INVALID_HANDLE_VALUE)
-    {
-        _tprintf(TEXT("Open Faild, Close com port"));
-        CloseHandle(hCom);
-        hCom = NULL;
-        return hCom;
-    }
-    _tprintf(TEXT("Open Success"));
-    return hCom;
 }
 
-
-bool win_com_close(HANDLE hCom)
+static void event_handler(lv_event_t* e)
 {
-    _tprintf(TEXT("Close com port success"));
-    CloseHandle(hCom);
-    return true;
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t* obj = lv_event_get_target(e);
+    if (code == LV_EVENT_VALUE_CHANGED) {
+        int get_id;
+        get_id = lv_dropdown_get_selected(obj);
+        LV_LOG_USER("Open serial port: %d", get_id);
+        serial.close();
+        serial.open(port_id[get_id]);
+        serial.control();
+    }
+    else if (code == LV_EVENT_CLICKED) {
+        refresh_serial_list(obj);
+    }
 }
+
+static void btn_event_handler(lv_event_t* e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+
+    if (code == LV_EVENT_CLICKED) {
+        LV_LOG_USER("Clicked");
+        char data_buf[20] = "Hello Serial.";
+        serial.write(data_buf, 20);
+        char read_buf[20];
+        serial.read(read_buf, 20);
+        cout << "Read Serial data: " << read_buf << endl;
+    }
+    else if (code == LV_EVENT_VALUE_CHANGED) {
+        LV_LOG_USER("Toggled");
+    }
+}
+
 
 
 int gui_thread_main()
@@ -261,24 +180,36 @@ int gui_thread_main()
     lv_obj_t* label_obj = lv_label_create(lv_scr_act());
     lv_label_set_text(label_obj, "Hello LVGL");
     lv_obj_center(label_obj);
-    ui_init();
+
+//    ui_init();
     
-    lv_obj_add_flag(ui_IMG_USB, LV_OBJ_FLAG_HIDDEN);
+//    lv_obj_add_flag(ui_IMG_USB, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_t* dd = lv_dropdown_create(lv_scr_act());
+    lv_obj_align(dd, LV_ALIGN_TOP_MID, 0, 20);
+    lv_obj_add_event_cb(dd, event_handler, LV_EVENT_ALL, NULL);
+    lv_dropdown_clear_options(dd);
 
-    wchar_t portName[MAX_PORT_NUM][MAX_STR_LEN];
-    UINT n;
-    HANDLE hCom;
+    lv_obj_t* label;
 
-    _tprintf(TEXT("\nQueryDosDevice method : \n"));
-    n = win_com_scan(portName);
-    for (UINT i = 0; i < n; i++)
-        _tprintf(TEXT("\t%s\n"), portName[i]);
+    lv_obj_t* btn2 = lv_btn_create(lv_scr_act());
+    lv_obj_add_event_cb(btn2, btn_event_handler, LV_EVENT_ALL, NULL);
+    lv_obj_align(btn2, LV_ALIGN_CENTER, 0, 40);
+    lv_obj_add_flag(btn2, LV_OBJ_FLAG_CHECKABLE);
+    lv_obj_set_height(btn2, LV_SIZE_CONTENT);
 
-    hCom = win_com_open(portName[1]);
-    if (hCom != NULL)
-    {
-        win_com_close(hCom);
-    }
+    label = lv_label_create(btn2);
+    lv_label_set_text(label, "Toggle");
+    lv_obj_center(label);
+
+    refresh_serial_list(dd);
+
+    lv_obj_t* label_view = lv_obj_create(lv_scr_act());
+    label = lv_label_create(label_view);
+    lv_label_set_text(label, "Hitemm\r\n");
+    lv_obj_align(label, LV_ALIGN_TOP_RIGHT, 0, 0);
+    lv_label_ins_text(label, LV_LABEL_POS_LAST, "Emmm");
+
+
     while (!lv_win32_quit_signal)
     {
         lv_task_handler();

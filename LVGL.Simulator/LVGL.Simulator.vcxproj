@@ -16,7 +16,7 @@
   <Import Project="Mile.Project.Windows.Legacy\Mile.Project.Cpp.props" />
   <Import Project="freetype.props" />
   <PropertyGroup>
-    <IncludePath>$(MSBuildThisFileDirectory);$(IncludePath)</IncludePath>
+    <IncludePath>$(MSBuildThisFileDirectory);$(ProjectDir)win_port;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -76,6 +76,7 @@
     <ClCompile Include="ui_demo\ui_img_print_view_bg_png.c" />
     <ClCompile Include="ui_demo\ui_img_print_view_front_png.c" />
     <ClCompile Include="ui_demo\ui_img_roller_bg_png.c" />
+    <ClCompile Include="win_port\serial_port.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="LVGL.Simulator.rc" />

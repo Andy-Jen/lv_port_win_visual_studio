@@ -109,6 +109,7 @@
     <ClCompile Include="ui_demo\ui_img_roller_bg_png.c">
       <Filter>demo</Filter>
     </ClCompile>
+    <ClCompile Include="win_port\serial_port.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="LVGL.Simulator.rc" />
