@@ -11,10 +11,10 @@ class SerialPort
 public:
     SerialPort();
     bool scan(UINT IDList[]);
-    bool open(UINT portID);
+    HANDLE open(UINT portID);
     bool close(void);
     void write(LPCVOID data_buf, DWORD len);
-    void read(LPVOID read_buf, DWORD len);
+    DWORD read(LPVOID read_buf);
     void control();
     ~SerialPort();
     UINT com_cnt;

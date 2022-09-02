@@ -103,7 +103,7 @@ bool SerialPort::scan(UINT IDList[])
 }
 
 
-bool SerialPort::open(UINT portID)
+HANDLE SerialPort::open(UINT portID)
 {
     DWORD erM = 0;
     wchar_t comName[10];
@@ -122,7 +122,7 @@ bool SerialPort::open(UINT portID)
         0,  //独占方式
         NULL,
         OPEN_EXISTING,  //打开而不是创建
-        0, //重叠方式
+        FILE_FLAG_OVERLAPPED, //重叠方式
         NULL);
 
     if (this->hCom == INVALID_HANDLE_VALUE)
@@ -143,24 +143,49 @@ bool SerialPort::close(void)
     return true;
 }
 
+VOID lpOverLap_cb(
+    _In_    DWORD dwErrorCode,
+    _In_    DWORD dwNumberOfBytesTransfered,
+    _Inout_ LPOVERLAPPED lpOverlapped
+    )
+{
+    _tprintf(TEXT("lpOverLap_cb: %d, %d, %08X\r\n"), dwErrorCode, dwNumberOfBytesTransfered, lpOverlapped);
+}
+
+OVERLAPPED wr_ovLap;
+
 void SerialPort::write(LPCVOID data_buf, DWORD len)
 {
-    DWORD written;
-    if (WriteFile(this->hCom, data_buf, len, &written, NULL))
+
+    DWORD dwEvtMask;
+
+    if (WriteFileEx(this->hCom, data_buf, len, &wr_ovLap, lpOverLap_cb))
     {
         _tprintf(TEXT("WriteFile success\r\n"));
     }
     else
     {
-        _tprintf(TEXT("WriteFile failed [%d]\r\n"), written);
+        _tprintf(TEXT("WriteFile failed\r\n"));
     }
 }
 
-void SerialPort::read(LPVOID read_buf, DWORD len)
+DWORD SerialPort::read(LPVOID read_buf)
 {
-    DWORD read_byte;
-    ReadFile(this->hCom, read_buf, len, &read_byte, NULL);
+    DWORD dwEvtMask = 0;
+    if (WaitCommEvent(this->hCom, &dwEvtMask, &wr_ovLap))
+    {
+        if (dwEvtMask & EV_RXCHAR)
+        {
+            return ReadFileEx(this->hCom, read_buf, 10, &wr_ovLap, lpOverLap_cb);
+        }
+        else
+        {
+            PurgeComm(this->hCom, PURGE_RXCLEAR| PURGE_TXABORT| PURGE_TXCLEAR);
+        }
+    }
+    return 0;
 }
+
 void PrintCommState(DCB dcb)
 {
     //  Print some of the DCB structure values
@@ -176,9 +201,9 @@ void SerialPort::control()
     SetupComm(this->hCom, 1024, 1024); //输入缓冲区和输出缓冲区的大小都是1024
     COMMTIMEOUTS TimeOuts;
     //设定读超时
-    TimeOuts.ReadIntervalTimeout = 1000;
-    TimeOuts.ReadTotalTimeoutMultiplier = 500;
-    TimeOuts.ReadTotalTimeoutConstant = 5000;
+    TimeOuts.ReadIntervalTimeout = 10;
+    TimeOuts.ReadTotalTimeoutMultiplier = 100;
+    TimeOuts.ReadTotalTimeoutConstant = 1000;
 
     //设定写超时
     TimeOuts.WriteTotalTimeoutMultiplier = 500;
@@ -194,4 +219,20 @@ void SerialPort::control()
     SetCommState(this->hCom, &dcb);
     PurgeComm(this->hCom, PURGE_TXCLEAR | PURGE_RXCLEAR);
     PrintCommState(dcb);
+
+    wr_ovLap.hEvent = CreateEvent(
+        NULL,   // default security attributes 
+        TRUE,   // manual-reset event 
+        FALSE,  // not signaled 
+        NULL    // no name
+    );
+    // Initialize the rest of the OVERLAPPED structure to zero.
+    wr_ovLap.Internal = 0;
+    wr_ovLap.InternalHigh = 0;
+    wr_ovLap.Offset = 0;
+    wr_ovLap.OffsetHigh = 0;
+
+    SetCommMask(this->hCom, EV_RXCHAR);
 }
+
+

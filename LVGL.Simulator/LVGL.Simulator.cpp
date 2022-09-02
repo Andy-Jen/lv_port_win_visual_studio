@@ -116,6 +116,7 @@ void refresh_serial_list(lv_obj_t* list_obj)
         }
     }
 }
+HANDLE serial_com;
 
 static void event_handler(lv_event_t* e)
 {
@@ -126,7 +127,7 @@ static void event_handler(lv_event_t* e)
         get_id = lv_dropdown_get_selected(obj);
         LV_LOG_USER("Open serial port: %d", get_id);
         serial.close();
-        serial.open(port_id[get_id]);
+        serial_com = serial.open(port_id[get_id]);
         serial.control();
     }
     else if (code == LV_EVENT_CLICKED) {
@@ -142,16 +143,26 @@ static void btn_event_handler(lv_event_t* e)
         LV_LOG_USER("Clicked");
         char data_buf[20] = "Hello Serial.";
         serial.write(data_buf, 20);
-        //char read_buf[20];
-        //serial.read(read_buf, 20);
-        //cout << "Read Serial data: " << read_buf << endl;
+
     }
     else if (code == LV_EVENT_VALUE_CHANGED) {
         LV_LOG_USER("Toggled");
     }
 }
+char read_buf[1024];
+void my_timer(lv_timer_t* timer)
+{
+    /*Use the user_data*/
+    uint32_t* user_data = (uint32_t *)timer->user_data;
+//    memset(read_buf, 00, 1024);
+    UINT rd_len = serial.read(read_buf);
+    /*Do something with LVGL*/
+    if (rd_len > 0)
+    {
+        LV_LOG_USER("Read len: %d, buf: %s", rd_len, read_buf);
+    }
 
-
+}
 
 int gui_thread_main()
 {
@@ -221,10 +232,16 @@ int gui_thread_main()
     _tprintf(TEXT("Read file: %s\r\n"), read_buf);
     FileTest.close();
 
+    static uint32_t user_data = 10;
+    lv_timer_t* timer = lv_timer_create(my_timer, 10, &user_data);
+
+
+
     while (!lv_win32_quit_signal)
     {
         lv_task_handler();
         Sleep(1);
+
     }
 
     return 0;
