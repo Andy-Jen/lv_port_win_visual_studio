@@ -110,6 +110,7 @@
       <Filter>demo</Filter>
     </ClCompile>
     <ClCompile Include="win_port\serial_port.cpp" />
+    <ClCompile Include="win_port\file_port.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="LVGL.Simulator.rc" />

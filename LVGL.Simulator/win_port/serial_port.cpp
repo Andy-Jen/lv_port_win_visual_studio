@@ -122,7 +122,7 @@ bool SerialPort::open(UINT portID)
         0,  //独占方式
         NULL,
         OPEN_EXISTING,  //打开而不是创建
-        FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, //重叠方式
+        0, //重叠方式
         NULL);
 
     if (this->hCom == INVALID_HANDLE_VALUE)
@@ -133,7 +133,7 @@ bool SerialPort::open(UINT portID)
         return this->hCom;
     }
     _tprintf(TEXT("Open Success\n"));
-    return hCom;
+    return this->hCom;
 }
 
 bool SerialPort::close(void)
@@ -142,12 +142,17 @@ bool SerialPort::close(void)
     CloseHandle(this->hCom);
     return true;
 }
+
 void SerialPort::write(LPCVOID data_buf, DWORD len)
 {
     DWORD written;
-    if (!WriteFile(this->hCom, data_buf, len, &written, NULL))
+    if (WriteFile(this->hCom, data_buf, len, &written, NULL))
     {
-        _tprintf(TEXT("Write error %d\n"), written);
+        _tprintf(TEXT("WriteFile success\r\n"));
+    }
+    else
+    {
+        _tprintf(TEXT("WriteFile failed [%d]\r\n"), written);
     }
 }
 
@@ -155,9 +160,16 @@ void SerialPort::read(LPVOID read_buf, DWORD len)
 {
     DWORD read_byte;
     ReadFile(this->hCom, read_buf, len, &read_byte, NULL);
-    _tprintf(TEXT("Read %d bytes\n"), read_byte);
 }
-
+void PrintCommState(DCB dcb)
+{
+    //  Print some of the DCB structure values
+    _tprintf(TEXT("\nBaudRate = %d, ByteSize = %d, Parity = %d, StopBits = %d\n"),
+        dcb.BaudRate,
+        dcb.ByteSize,
+        dcb.Parity,
+        dcb.StopBits);
+}
 
 void SerialPort::control()
 {
@@ -175,10 +187,11 @@ void SerialPort::control()
 
     DCB dcb;
     GetCommState(this->hCom, &dcb);
-    dcb.BaudRate = 9600; //波特率为9600
+    dcb.BaudRate = CBR_57600; //波特率为9600
     dcb.ByteSize = 8; //每个字节有8位
     dcb.Parity = NOPARITY; //无奇偶校验位
     dcb.StopBits = ONESTOPBIT; //两个停止位
-    //SetCommState(this->hCom, &dcb);
+    SetCommState(this->hCom, &dcb);
     PurgeComm(this->hCom, PURGE_TXCLEAR | PURGE_RXCLEAR);
+    PrintCommState(dcb);
 }

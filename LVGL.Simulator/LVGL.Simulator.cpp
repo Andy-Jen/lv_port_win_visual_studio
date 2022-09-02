@@ -17,6 +17,7 @@
 #include <iostream>
 #include "resource.h"
 #include "serial_port.h"
+#include "file_port.h"
 
 using namespace std;
 
@@ -141,9 +142,9 @@ static void btn_event_handler(lv_event_t* e)
         LV_LOG_USER("Clicked");
         char data_buf[20] = "Hello Serial.";
         serial.write(data_buf, 20);
-        char read_buf[20];
-        serial.read(read_buf, 20);
-        cout << "Read Serial data: " << read_buf << endl;
+        //char read_buf[20];
+        //serial.read(read_buf, 20);
+        //cout << "Read Serial data: " << read_buf << endl;
     }
     else if (code == LV_EVENT_VALUE_CHANGED) {
         LV_LOG_USER("Toggled");
@@ -209,6 +210,16 @@ int gui_thread_main()
     lv_obj_align(label, LV_ALIGN_TOP_RIGHT, 0, 0);
     lv_label_ins_text(label, LV_LABEL_POS_LAST, "Emmm");
 
+    FilePort FileTest;
+    char data_buf[20] = "Hello win32.";
+
+    FileTest.open(TEXT("D://TestFiles.txt"));
+    FileTest.write(data_buf, strlen(data_buf));
+
+    char read_buf[20];
+    FileTest.read(read_buf, 10);
+    _tprintf(TEXT("Read file: %s\r\n"), read_buf);
+    FileTest.close();
 
     while (!lv_win32_quit_signal)
     {
