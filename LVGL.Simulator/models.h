@@ -47,6 +47,10 @@ extern void lv_obj_set_content(lv_obj_t* obj);
 
 extern void lv_obj_set_features(lv_obj_t* obj, lv_coord_t w, lv_coord_t h, lv_align_t align, lv_coord_t pos_x, lv_coord_t pos_y);
 
+extern lv_obj_t* create_base_obj(lv_obj_t* parent, lv_coord_t w, lv_coord_t h);
+
+extern lv_obj_t* create_box(lv_obj_t* parent, lv_coord_t w, lv_coord_t h);
+
 extern lv_obj_t* create_icon(lv_obj_t* parent, const void* src);
 
 extern lv_obj_t* create_head_label(lv_obj_t* parent, const char* label_str);
@@ -63,7 +67,7 @@ extern lv_obj_t* create_slider(lv_obj_t* parent, int32_t min, int32_t max);
 
 extern lv_obj_t* create_statusbar(lv_obj_t* parent, const char* head_name);
 
-extern lv_obj_t* create_box(lv_obj_t* parent, lv_coord_t w, lv_coord_t h);
+
 #ifdef __cplusplus
 } /*extern "C"*/
 #endif

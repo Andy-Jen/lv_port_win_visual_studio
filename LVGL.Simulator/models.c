@@ -19,26 +19,34 @@ lv_obj_t* create_icon(lv_obj_t* parent, const void* src)
     return new_icon;
 }
 
+lv_obj_t* create_base_obj(lv_obj_t* parent, lv_coord_t w, lv_coord_t h)
+{
+    lv_obj_t* base_obj = lv_obj_create(parent);
+    lv_obj_set_size(base_obj, w, h);
+    lv_obj_clear_flag(base_obj, LV_OBJ_FLAG_SCROLLABLE);
+
+    lv_obj_set_style_bg_color(base_obj, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(base_obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_main_stop(base_obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_stop(base_obj, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(base_obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_left(base_obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_right(base_obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_top(base_obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_pad_bottom(base_obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    return base_obj;
+}
+
 lv_obj_t* create_box(lv_obj_t* parent, lv_coord_t w, lv_coord_t h)
 {
-    lv_obj_t* box = lv_obj_create(parent);
-    lv_obj_set_size(box, w, h);
-
-    lv_obj_clear_flag(box, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_t* box = create_base_obj(parent, w, h);
 
     lv_obj_set_style_bg_color(box, lv_color_hex(0x191D26), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(box, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_main_stop(box, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_grad_stop(box, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_border_width(box, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_outline_color(box, lv_color_hex(0x414B62), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_outline_opa(box, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_outline_width(box, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_outline_pad(box, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_left(box, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_right(box, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_top(box, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_pad_bottom(box, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
     return box;
 }
 
