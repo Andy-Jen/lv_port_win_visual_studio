@@ -18,6 +18,7 @@
 #include "resource.h"
 #include "serial_port.h"
 #include "file_port.h"
+#include "models.h"
 
 using namespace std;
 
@@ -207,8 +208,9 @@ int gui_thread_main()
     //lv_label_set_text(label_obj, "Hello LVGL");
     //lv_obj_center(label_obj);
 
-    ui_init();
-    
+    //ui_init();
+    page_main_init();
+
     //lv_obj_t* drop_bar_obj = lv_dropdown_create(lv_scr_act());
     //lv_obj_align(drop_bar_obj, LV_ALIGN_TOP_MID, 0, 20);
     //lv_obj_add_event_cb(drop_bar_obj, event_handler, LV_EVENT_ALL, NULL);

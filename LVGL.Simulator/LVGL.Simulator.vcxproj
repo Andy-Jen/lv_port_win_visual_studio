@@ -47,6 +47,7 @@
     <ClCompile Include="application.cpp" />
     <ClCompile Include="LVGL.Simulator.cpp" />
     <ClCompile Include="models.c" />
+    <ClCompile Include="page_main.c" />
     <ClCompile Include="ui_demo\ui.c" />
     <ClCompile Include="ui_demo\ui_font_Small_Font.c" />
     <ClCompile Include="ui_demo\ui_helpers.c" />

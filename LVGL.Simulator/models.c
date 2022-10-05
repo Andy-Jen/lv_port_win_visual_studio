@@ -282,3 +282,21 @@ lv_obj_t* create_statusbar(lv_obj_t* parent, const char* head_name)
         LV_ALIGN_RIGHT_MID, -84, 0);
     return new_statusbar;
 }
+
+lv_obj_t* create_glow(lv_obj_t* parent, lv_coord_t w, lv_coord_t h)
+{
+    lv_obj_t* glow_obj = lv_obj_create(parent);
+    lv_obj_set_size(glow_obj, w, h);
+    lv_obj_set_style_radius(glow_obj, 60, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(glow_obj, lv_color_hex(0x00D2FF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(glow_obj, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_main_stop(glow_obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_stop(glow_obj, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_border_width(glow_obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_color(glow_obj, lv_color_hex(0x60BEFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_opa(glow_obj, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_width(glow_obj, 50, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_shadow_spread(glow_obj, 14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_opa(glow_obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    return glow_obj;
+}

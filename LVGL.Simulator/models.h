@@ -67,6 +67,9 @@ extern lv_obj_t* create_slider(lv_obj_t* parent, int32_t min, int32_t max);
 
 extern lv_obj_t* create_statusbar(lv_obj_t* parent, const char* head_name);
 
+extern lv_obj_t* create_glow(lv_obj_t* parent, lv_coord_t w, lv_coord_t h);
+
+extern void page_main_init(void);
 
 #ifdef __cplusplus
 } /*extern "C"*/

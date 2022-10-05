@@ -117,6 +117,9 @@
     <ClCompile Include="models.c">
       <Filter>demo</Filter>
     </ClCompile>
+    <ClCompile Include="page_main.c">
+      <Filter>demo</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="LVGL.Simulator.rc" />
