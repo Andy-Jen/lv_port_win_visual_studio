@@ -24,6 +24,8 @@ lv_obj_t* create_box(lv_obj_t* parent, lv_coord_t w, lv_coord_t h)
     lv_obj_t* box = lv_obj_create(parent);
     lv_obj_set_size(box, w, h);
 
+    lv_obj_clear_flag(box, LV_OBJ_FLAG_SCROLLABLE);
+
     lv_obj_set_style_bg_color(box, lv_color_hex(0x191D26), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_opa(box, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_bg_main_stop(box, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
