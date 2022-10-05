@@ -164,6 +164,20 @@ void my_timer(lv_timer_t* timer)
 
 }
 
+lv_obj_t*  btn_create(lv_obj_t* parent, const char *btn_name, lv_event_cb_t event_cb)
+{
+    lv_obj_t* new_btn = lv_btn_create(parent);
+    lv_obj_add_event_cb(new_btn, event_cb, LV_EVENT_ALL, NULL);
+//    lv_obj_add_flag(new_btn, LV_OBJ_FLAG_CHECKABLE);
+    lv_obj_set_height(new_btn, LV_SIZE_CONTENT);
+
+    lv_obj_t* label = lv_label_create(new_btn);
+    lv_label_set_text(label, btn_name);
+    lv_obj_center(label);
+    return new_btn;
+}
+
+
 int gui_thread_main()
 {
     lv_init();
@@ -179,70 +193,50 @@ int gui_thread_main()
     }
 
     lv_win32_add_all_input_devices_to_group(NULL);
-    static lv_color_t canvas_buf[LV_CANVAS_BUF_SIZE_TRUE_COLOR(CANVAS_WIDTH, CANVAS_HEIGHT)];
+    //static lv_color_t canvas_buf[LV_CANVAS_BUF_SIZE_TRUE_COLOR(CANVAS_WIDTH, CANVAS_HEIGHT)];
 
-    lv_obj_t* canvas_obj = lv_canvas_create(lv_scr_act());
-    lv_obj_center(canvas_obj);
-    lv_memset_ff(canvas_buf, LV_CANVAS_BUF_SIZE_TRUE_COLOR(CANVAS_WIDTH, CANVAS_HEIGHT));
-    lv_canvas_set_buffer(canvas_obj, canvas_buf, CANVAS_WIDTH, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);
-    lv_canvas_fill_bg(canvas_obj, lv_palette_lighten(LV_PALETTE_YELLOW, 3), LV_OPA_COVER);
-    lv_obj_set_style_border_color(canvas_obj, lv_color_black(), LV_STATE_DEFAULT);
-    lv_obj_set_style_border_width(canvas_obj, 3, LV_STATE_DEFAULT);
-    lv_obj_set_style_radius(canvas_obj, 5, LV_STATE_DEFAULT);
-    lv_obj_t* label_obj = lv_label_create(lv_scr_act());
-    lv_label_set_text(label_obj, "Hello LVGL");
-    lv_obj_center(label_obj);
+    //lv_obj_t* canvas_obj = lv_canvas_create(lv_scr_act());
+    //lv_obj_center(canvas_obj);
+    //lv_memset_ff(canvas_buf, LV_CANVAS_BUF_SIZE_TRUE_COLOR(CANVAS_WIDTH, CANVAS_HEIGHT));
+    //lv_canvas_set_buffer(canvas_obj, canvas_buf, CANVAS_WIDTH, CANVAS_HEIGHT, LV_IMG_CF_TRUE_COLOR);
+    //lv_canvas_fill_bg(canvas_obj, lv_palette_lighten(LV_PALETTE_YELLOW, 3), LV_OPA_COVER);
+    //lv_obj_set_style_border_color(canvas_obj, lv_color_black(), LV_STATE_DEFAULT);
+    //lv_obj_set_style_border_width(canvas_obj, 3, LV_STATE_DEFAULT);
+    //lv_obj_set_style_radius(canvas_obj, 5, LV_STATE_DEFAULT);
+    //lv_obj_t* label_obj = lv_label_create(lv_scr_act());
+    //lv_label_set_text(label_obj, "Hello LVGL");
+    //lv_obj_center(label_obj);
 
-//    ui_init();
+    ui_init();
     
-//    lv_obj_add_flag(ui_IMG_USB, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_t* dd = lv_dropdown_create(lv_scr_act());
-    lv_obj_align(dd, LV_ALIGN_TOP_MID, 0, 20);
-    lv_obj_add_event_cb(dd, event_handler, LV_EVENT_ALL, NULL);
-    lv_dropdown_clear_options(dd);
+    //lv_obj_t* drop_bar_obj = lv_dropdown_create(lv_scr_act());
+    //lv_obj_align(drop_bar_obj, LV_ALIGN_TOP_MID, 0, 20);
+    //lv_obj_add_event_cb(drop_bar_obj, event_handler, LV_EVENT_ALL, NULL);
+    //lv_dropdown_clear_options(drop_bar_obj);
+    //refresh_serial_list(drop_bar_obj);
 
-    lv_obj_t* label;
+    //lv_obj_t* send_btn = btn_create(lv_scr_act(), "Send", btn_event_handler);
 
-    lv_obj_t* btn2 = lv_btn_create(lv_scr_act());
-    lv_obj_add_event_cb(btn2, btn_event_handler, LV_EVENT_ALL, NULL);
-    lv_obj_align(btn2, LV_ALIGN_CENTER, 0, 40);
-    lv_obj_add_flag(btn2, LV_OBJ_FLAG_CHECKABLE);
-    lv_obj_set_height(btn2, LV_SIZE_CONTENT);
+    //lv_obj_align(send_btn, LV_ALIGN_CENTER, 0, 40);
 
-    label = lv_label_create(btn2);
-    lv_label_set_text(label, "Toggle");
-    lv_obj_center(label);
+    //FilePort FileTest;
+    //char data_buf[20] = "Hello win32.";
 
-    refresh_serial_list(dd);
+    //FileTest.open(TEXT("D://TestFiles.txt"));
+    //FileTest.write(data_buf, strlen(data_buf));
 
-    lv_obj_t* label_view = lv_obj_create(lv_scr_act());
-    label = lv_label_create(label_view);
-    lv_label_set_text(label, "Hitemm\r\n");
-    lv_obj_align(label, LV_ALIGN_TOP_RIGHT, 0, 0);
-    lv_label_ins_text(label, LV_LABEL_POS_LAST, "Emmm");
-
-    FilePort FileTest;
-    char data_buf[20] = "Hello win32.";
-
-    FileTest.open(TEXT("D://TestFiles.txt"));
-    FileTest.write(data_buf, strlen(data_buf));
-
-    char read_buf[20];
-    FileTest.read(read_buf, 10);
-    _tprintf(TEXT("Read file: %s\r\n"), read_buf);
-    FileTest.close();
+    //char read_buf[20];
+    //FileTest.read(read_buf, 10);
+    //_tprintf(TEXT("Read file: %s\r\n"), read_buf);
+    //FileTest.close();
 
     static uint32_t user_data = 10;
     lv_timer_t* timer = lv_timer_create(my_timer, 10, &user_data);
-
-
 
     while (!lv_win32_quit_signal)
     {
         lv_task_handler();
         Sleep(1);
-
     }
-
     return 0;
 }

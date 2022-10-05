@@ -5,6 +5,9 @@
   <ItemGroup>
     <ClInclude Include="lv_conf.h" />
     <ClInclude Include="lv_drv_conf.h" />
+    <ClInclude Include="models.h">
+      <Filter>demo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="LVGL.Simulator.manifest" />
@@ -111,6 +114,9 @@
     </ClCompile>
     <ClCompile Include="win_port\serial_port.cpp" />
     <ClCompile Include="win_port\file_port.cpp" />
+    <ClCompile Include="models.c">
+      <Filter>demo</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="LVGL.Simulator.rc" />
