@@ -20,6 +20,24 @@ void page_main_screen_init(void)
     lv_obj_set_features(screen_bg, 800, 480, LV_ALIGN_CENTER, 0, 0);
 
     lv_obj_t* statusbar = create_statusbar(screen_obj, "Base Demo");
+
+    lv_obj_t* new_obj = create_btn(screen_obj, "This Btn");
+    lv_obj_center(new_obj);
+    lv_obj_set_pos(new_obj, 0, 0);
+
+    new_obj = create_switch(screen_obj, "switch");
+    lv_obj_center(new_obj);
+    lv_obj_set_pos(new_obj, 0, 60);
+    new_obj = create_slider(screen_obj, 0, 100);
+    lv_obj_center(new_obj);
+    lv_obj_set_pos(new_obj, 0, 140);
+    new_obj = create_base_obj(screen_obj, 100, 100);
+    lv_obj_center(new_obj);
+    lv_obj_set_pos(new_obj, 120, 0);
+
+    new_obj = create_box(screen_obj, 50, 50);
+    lv_obj_center(new_obj);
+    lv_obj_set_pos(new_obj, -120, 0);
 }
 
 void page_main_init(void)
