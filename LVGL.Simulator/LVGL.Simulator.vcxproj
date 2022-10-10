@@ -30,6 +30,7 @@
   <Import Project="LVGL.Portable.vcxitems" />
   <Import Project="LVGL.Drivers.vcxitems" />
   <ItemGroup>
+    <ClInclude Include="lvgl\src\widgets\lv_rocker.h" />
     <ClInclude Include="lv_conf.h" />
   </ItemGroup>
   <ItemGroup>
@@ -46,6 +47,7 @@
   <ItemGroup>
     <ClCompile Include="application.cpp" />
     <ClCompile Include="LVGL.Simulator.cpp" />
+    <ClCompile Include="lvgl\src\widgets\lv_rocker.c" />
     <ClCompile Include="models.c" />
     <ClCompile Include="page_main.c" />
     <ClCompile Include="ui_demo\ui.c" />

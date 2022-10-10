@@ -8,6 +8,7 @@
     <ClInclude Include="models.h">
       <Filter>demo</Filter>
     </ClInclude>
+    <ClInclude Include="lvgl\src\widgets\lv_rocker.h" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="LVGL.Simulator.manifest" />
@@ -120,6 +121,7 @@
     <ClCompile Include="page_main.c">
       <Filter>demo</Filter>
     </ClCompile>
+    <ClCompile Include="lvgl\src\widgets\lv_rocker.c" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="LVGL.Simulator.rc" />

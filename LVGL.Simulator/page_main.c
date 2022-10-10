@@ -38,6 +38,17 @@ void page_main_screen_init(void)
     new_obj = create_box(screen_obj, 50, 50);
     lv_obj_center(new_obj);
     lv_obj_set_pos(new_obj, -120, 0);
+
+    new_obj = lv_rocker_create(screen_obj);
+    lv_obj_center(new_obj);
+    lv_obj_set_pos(new_obj, 120, 60);
+
+    lv_obj_set_style_bg_color(new_obj, lv_color_hex(0x191D26), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(new_obj, 100, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_color(new_obj, lv_color_hex(0x414B62), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_opa(new_obj, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_width(new_obj, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_outline_pad(new_obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
 }
 
 void page_main_init(void)
